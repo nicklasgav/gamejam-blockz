@@ -1,17 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler 
+public class BlockController : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler 
 {
 	private GameObject itemBeingDragged;
 	private Vector3 startPosition;
-	private Transform startParent;
-
-
-	public GameObject ConnectedBlock;
-	private Vector3 startPositionConnectedBlock;
-	private Transform connectedBlockStartParent;
 
 	#region IBeginDragHandler implementation
 
@@ -19,15 +14,10 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 	{
 		Debug.Log ("Drag start");
 
-		itemBeingDragged = gameObject;
-		startPosition = transform.position;
-		startParent = transform.parent;
+	
+		itemBeingDragged = gameObject.transform.parent.parent.gameObject;
 
-		if (ConnectedBlock != null) {
-			startPositionConnectedBlock = ConnectedBlock.transform.position;
-			connectedBlockStartParent = ConnectedBlock.transform.parent;
-		}
-		//GetComponent<CanvasGroup> ().blocksRaycasts = false;
+		startPosition = itemBeingDragged.transform.position;
 	}
 
 	#endregion
@@ -36,10 +26,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 	public void OnDrag (PointerEventData eventData)
 	{
 		Debug.Log ("Dragging");
-		transform.position = Input.mousePosition;
-
-		if (ConnectedBlock != null)
-			ConnectedBlock.transform.position = Input.mousePosition - (startPosition - startPositionConnectedBlock);
+		itemBeingDragged.transform.position = Input.mousePosition;
 	}
 	#endregion
 
@@ -48,14 +35,8 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 	public void OnEndDrag (PointerEventData eventData)
 	{
 		Debug.Log ("Drag end");
+		itemBeingDragged.transform.position = startPosition;
 		itemBeingDragged = null;
-
-		//if(transform.parent == startParent)
-		transform.position = startPosition;
-
-		if(ConnectedBlock != null)
-			ConnectedBlock.transform.position = startPositionConnectedBlock;
-		//GetComponent<CanvasGroup> ().blocksRaycasts = true;
 	}
 
 	#endregion
