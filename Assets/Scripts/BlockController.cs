@@ -14,10 +14,12 @@ public class BlockController : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 	{
 		Debug.Log ("Drag start");
 
-	
 		itemBeingDragged = gameObject.transform.parent.parent.gameObject;
-
 		startPosition = itemBeingDragged.transform.position;
+
+		// Hämta ut blockbuilder
+		var blockBuilder = gameObject.GetComponentInParent<BlockBuilder> ();
+		blockBuilder.SetNormalSized ();
 	}
 
 	#endregion
@@ -37,6 +39,9 @@ public class BlockController : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 		Debug.Log ("Drag end");
 		itemBeingDragged.transform.position = startPosition;
 		itemBeingDragged = null;
+
+		var blockBuilder = gameObject.GetComponentInParent<BlockBuilder> ();
+		blockBuilder.SetToyboxSize ();
 	}
 
 	#endregion
