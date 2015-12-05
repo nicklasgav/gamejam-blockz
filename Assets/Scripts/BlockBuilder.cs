@@ -20,24 +20,94 @@ public class BlockBuilder : MonoBehaviour
 	{
 		SetBlock (new string[][] {
 			new string[] {
-				"FFF0000",
-				"FF00000",
+				"FFF000",
+				"FF0000",
 				null
 			},
 			new string[] {
-				"FF00000",
-				"FF00000",
-				"FF00000"
+				"FF0000",
+				"FF0000",
+				"A71232"
 			},
 			new string[] {
 				null,
-				"FF00000",
+				"FF0000",
 				null
 			}
 		});
 	}
 
-	public void SetBlock(string[][] blockDesign) 
+	private BlockController _dragBlock;
+	private Vector3 _dragStartPosition;
+	private Vector3 _mouseStartDragPosition;
+
+	public void DragStart(BlockController block)
+	{
+		SetNormalSized ();
+
+		_dragBlock = block;
+		_dragStartPosition = transform.position;
+		_mouseStartDragPosition = Input.mousePosition;
+		//_dragStartPosition = startPosition;
+
+		foreach (var b in _blocks) {
+			var slot = b.GetComponent<BlockController>().Slot;
+			b.gameObject.transform.SetParent(slot.transform);
+		}
+
+		gameObject.SetActive(true);
+	}
+
+	public void Dragging(Vector3 mousePosition)
+	{
+		transform.position = mousePosition; // TODO
+		Vector3 delta = _mouseStartDragPosition - Input.mousePosition;
+
+
+		var gameGrid = GameObject.FindWithTag ("GameController");
+
+		var gameSlots = gameGrid.GetComponentsInChildren<SlotController> ();
+
+		foreach (var slot in gameSlots)
+			slot.GetComponent<Image> ().color = new Color(Color.white.r, Color.white.g, Color.white.b, .25f);
+
+		foreach (var block in _blocks) {
+			block.GetComponent<BlockController>().SetPreviewColor(delta);
+		}
+	}
+
+	public void DragEnd()
+	{
+		// Kolla om vi kan släppa slots
+		Vector3 delta = _mouseStartDragPosition - Input.mousePosition;
+		bool canBeDropped = true;
+
+		foreach (var block in _blocks) 
+		{
+			if(!block.GetComponent<BlockController>().CanBeDropped(delta))
+			{
+				canBeDropped = false;
+				break;
+			}
+		}
+
+		// Återställ om vi inte kan släppa
+		if (canBeDropped) {
+			// Släpp ner block
+			foreach(var block in _blocks)
+				block.GetComponent<BlockController>().Drop(delta);
+
+			gameObject.SetActive(false);
+		} else {
+			// TODO: Kolla om den är från brädet eller från toybox
+			SetToyboxSize ();
+			transform.position = _dragStartPosition;
+		}
+
+		_dragBlock = null;
+	}
+
+	private void SetBlock(string[][] blockDesign) 
 	{
 		// [[1,0,1,0,1], [1,2,3,4,5], [1,2,3,4,5], [1,2,3,4,5], [1,2,3,4,5]]
 
@@ -64,17 +134,23 @@ public class BlockBuilder : MonoBehaviour
 				slot.transform.SetParent(gameObject.transform);
 				_slots.Add(slot);
 
-				var blockColor = blockDesign[i][j];
+				var blockColor = blockDesign[j][i];
 				if(blockColor != null) 
 				{
 					// Skapa blocket
 					GameObject block = Instantiate(Block);
+					BlockController blockController = block.GetComponent<BlockController>();
+
 					block.SetActive(true);
 					block.transform.SetParent(slot.transform);
+					blockController.SetBuilder(this);
+					blockController.SetSlot(slot);
+					block.name = "Block " + i + ", " + j;
 
 					// Uppdater färgen på blocket
 					var c = HexToColor(blockColor);
 					block.GetComponent<Image>().color = c;
+				
 
 					_blocks.Add(block);
 				}
@@ -112,17 +188,11 @@ public class BlockBuilder : MonoBehaviour
 		}
 	}
 
-	private string ColorToHex(Color32 color)
-	{
-		string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2");
-		return hex;
-	}
-	
 	private Color HexToColor(string hex)
 	{
 		byte r = byte.Parse(hex.Substring(0,2), System.Globalization.NumberStyles.HexNumber);
 		byte g = byte.Parse(hex.Substring(2,2), System.Globalization.NumberStyles.HexNumber);
 		byte b = byte.Parse(hex.Substring(4,2), System.Globalization.NumberStyles.HexNumber);
-		return new Color(r,g,b, 255);
+		return new Color(r/255f,g/255f,b/255f, 1f);
 	}
 }
