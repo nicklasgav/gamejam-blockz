@@ -20,7 +20,7 @@ public class BlockBuilder : MonoBehaviour
 	{
 		SetBlock (new string[][] {
 			new string[] {
-				"FF00000",
+				"FFF0000",
 				"FF00000",
 				null
 			},
