@@ -18,6 +18,14 @@ public class BlockBuilder : MonoBehaviour
 
 	void Start() 
 	{
+		Debug.Log ("BlockBuilder Start");
+	}
+
+	private BlockController _dragBlock;
+	private Vector3 _dragStartPosition;
+	private Vector3 _mouseStartDragPosition;
+
+	public void test() {
 		SetBlock (new string[][] {
 			new string[] {
 				"FFF000",
@@ -36,10 +44,6 @@ public class BlockBuilder : MonoBehaviour
 			}
 		});
 	}
-
-	private BlockController _dragBlock;
-	private Vector3 _dragStartPosition;
-	private Vector3 _mouseStartDragPosition;
 
 	public void DragStart(BlockController block)
 	{
