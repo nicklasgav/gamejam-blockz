@@ -10,7 +10,7 @@ public class startgame : MonoBehaviour {
 	
 	void Start() { 
 		MyButton.onClick.AddListener(() => { 
-			Application.LoadLevel("Level 1");
+			Application.LoadLevel("Nicklas Test");
 		});
 	}
 	
